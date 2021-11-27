@@ -11,6 +11,6 @@ public class StartAliyunFC implements StreamRequestHandler {
 
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) {
-
+        System.out.println(System.currentTimeMillis());
     }
 }
