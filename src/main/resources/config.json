@@ -6,7 +6,7 @@
     "endpoint": "spider-hongkong.oss-cn-hongkong-internal.aliyuncs.com",
     "region": "cn-hongkong",
     "bucketName": "spider-hongkong",
-    "path": "spider/${missionName}/${requestName}/${GMTString}.json"
+    "path": "spider/${missionName}/${requestName}/${currentTime}.json"
   },
   "requests": [
     {

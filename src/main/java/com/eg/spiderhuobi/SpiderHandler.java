@@ -4,12 +4,10 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.amazonaws.services.s3.model.PutObjectResult;
 import com.github.makewheels.s3util.S3Config;
 import com.github.makewheels.s3util.S3Service;
 
 import java.io.File;
-import java.time.LocalDateTime;
 
 public class SpiderHandler {
     private final S3Service s3Service = new S3Service();
@@ -49,8 +47,9 @@ public class SpiderHandler {
         String path = target.getString("path");
         path = path.replace("${missionName}", missionName);
         path = path.replace("${requestName}", requestName);
-        path = path.replace("${GMTString}", LocalDateTime.now().toString());
+        path = path.replace("${currentTime}", System.currentTimeMillis() + "");
         s3Service.putObject(path, response);
+        System.out.println("SAVE " + path);
     }
 
 }
