@@ -59,9 +59,10 @@ public class SpiderHandler {
         path = path.replace("${requestName}", requestName);
 
         //保存数据文件
-        String fileBaseName = InvokeUtil.getInvokeId() + "-" + IdUtil.getSnowflake().nextIdStr();
+        String dataId = IdUtil.getSnowflake().nextIdStr();
+        String fileBaseName = InvokeUtil.getInvokeId() + "-" + dataId;
         String basePath = path;
-        path = path.replace("${fileName}", fileBaseName + ".data.json");
+        path = path.replace("${fileName}", fileBaseName + ".data");
         s3Service.putObject(path, response);
         System.out.println("SAVE " + path);
 
@@ -69,6 +70,10 @@ public class SpiderHandler {
         JSONObject info = new JSONObject();
         info.put("provider", "aliyun-fc");
         info.put("createTime", Instant.now().toString());
+        info.put("invokeId", InvokeUtil.getInvokeId());
+        info.put("dataId", dataId);
+        info.put("missionName", missionName);
+        info.put("requestName", requestName);
 
         JSONObject providerParams = new JSONObject();
         Context context = InvokeUtil.getContext();
@@ -78,7 +83,7 @@ public class SpiderHandler {
         providerParams.put("functionParam", functionParam);
         info.put("providerParams", providerParams);
 
-        basePath = basePath.replace("${fileName}", fileBaseName + ".info.json");
+        basePath = basePath.replace("${fileName}", fileBaseName + ".data.info");
         s3Service.putObject(basePath, info.toJSONString());
 
         System.out.println("SAVE " + basePath);
