@@ -42,14 +42,12 @@ public class SpiderHandler {
         JSONArray requests = config.getJSONArray("requests");
         for (int i = 0; i < requests.size(); i++) {
             int finalI = i;
-            new Thread(() -> {
-                JSONObject request = requests.getJSONObject(finalI);
-                String requestName = request.getString("requestName");
-                JSONObject source = request.getJSONObject("source");
-                String url = source.getString("url");
-                String response = HttpUtil.get(url);
-                save(config, requestName, response);
-            }).start();
+            JSONObject request = requests.getJSONObject(finalI);
+            String requestName = request.getString("requestName");
+            JSONObject source = request.getJSONObject("source");
+            String url = source.getString("url");
+            String response = HttpUtil.get(url);
+            save(config, requestName, response);
         }
     }
 
