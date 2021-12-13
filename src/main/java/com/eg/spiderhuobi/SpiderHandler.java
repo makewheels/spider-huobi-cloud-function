@@ -1,13 +1,22 @@
 package com.eg.spiderhuobi;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.aliyun.fc.runtime.Context;
+import com.aliyun.fc.runtime.FunctionParam;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.github.makewheels.s3util.S3Config;
 import com.github.makewheels.s3util.S3Service;
+import lombok.val;
 
 import java.io.File;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 public class SpiderHandler {
     private final S3Service s3Service = new S3Service();
@@ -32,12 +41,15 @@ public class SpiderHandler {
         JSONObject config = getConfig();
         JSONArray requests = config.getJSONArray("requests");
         for (int i = 0; i < requests.size(); i++) {
-            JSONObject request = requests.getJSONObject(i);
-            String requestName = request.getString("requestName");
-            JSONObject source = request.getJSONObject("source");
-            String url = source.getString("url");
-            String response = HttpUtil.get(url);
-            save(config, requestName, response);
+            int finalI = i;
+            new Thread(() -> {
+                JSONObject request = requests.getJSONObject(finalI);
+                String requestName = request.getString("requestName");
+                JSONObject source = request.getJSONObject("source");
+                String url = source.getString("url");
+                String response = HttpUtil.get(url);
+                save(config, requestName, response);
+            }).start();
         }
     }
 
@@ -47,9 +59,32 @@ public class SpiderHandler {
         String path = target.getString("path");
         path = path.replace("${missionName}", missionName);
         path = path.replace("${requestName}", requestName);
-        path = path.replace("${currentTime}", System.currentTimeMillis() + "");
-        s3Service.putObject(path, response);
+
+        //保存数据文件
+        String fileBaseName = InvokeUtil.getInvokeId() + IdUtil.getSnowflake().nextIdStr();
+        String basePath = path;
+        path = path.replace("${fileName}", fileBaseName + ".data.json");
+        s3Service.putObject(basePath, response);
         System.out.println("SAVE " + path);
+
+        //保存描述信息文件
+        JSONObject info = new JSONObject();
+        info.put("provider", "aliyun-fc");
+        info.put("createTime", Instant.now().toString());
+
+        JSONObject providerParams = new JSONObject();
+        Context context = InvokeUtil.getContext();
+        String requestId = context.getRequestId();
+        FunctionParam functionParam = context.getFunctionParam();
+        providerParams.put("requestId", requestId);
+        providerParams.put("functionParam", functionParam);
+        info.put("providerParams", providerParams);
+
+        basePath = basePath.replace("${fileName}", fileBaseName + ".info.json");
+        s3Service.putObject(basePath, info.toJSONString());
+
+        System.out.println("SAVE " + basePath);
+
     }
 
 }

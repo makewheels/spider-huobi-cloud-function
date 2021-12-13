@@ -13,6 +13,7 @@ public class AliyunCrawl implements StreamRequestHandler {
 
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) {
+        InvokeUtil.init(input, output, context);
         spiderHandler.initS3();
         spiderHandler.crawl();
     }
