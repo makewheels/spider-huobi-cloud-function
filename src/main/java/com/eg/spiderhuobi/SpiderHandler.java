@@ -59,10 +59,10 @@ public class SpiderHandler {
         path = path.replace("${requestName}", requestName);
 
         //保存数据文件
-        String fileBaseName = InvokeUtil.getInvokeId() + IdUtil.getSnowflake().nextIdStr();
+        String fileBaseName = InvokeUtil.getInvokeId() + "-" + IdUtil.getSnowflake().nextIdStr();
         String basePath = path;
         path = path.replace("${fileName}", fileBaseName + ".data.json");
-        s3Service.putObject(basePath, response);
+        s3Service.putObject(path, response);
         System.out.println("SAVE " + path);
 
         //保存描述信息文件
