@@ -51,16 +51,6 @@ public class SpiderHandler {
         }
     }
 
-    private JSONObject getProviderParams() {
-        JSONObject providerParams = new JSONObject();
-        Context context = InvokeUtil.getContext();
-        String requestId = context.getRequestId();
-        FunctionParam functionParam = context.getFunctionParam();
-        providerParams.put("requestId", requestId);
-        providerParams.put("functionParam", functionParam);
-        return providerParams;
-    }
-
     private void save(JSONObject config, String requestName, String response, String requestUrl) {
         JSONObject target = config.getJSONObject("target");
         String missionName = config.getString("missionName");
@@ -87,7 +77,7 @@ public class SpiderHandler {
         info.put("requestName", requestName);
         info.put("requestUrl", requestUrl);
 
-        info.put("providerParams", getProviderParams());
+        info.put("providerParams", InvokeUtil.getProviderParams());
 
         basePath = basePath.replace("${fileName}", fileBaseName + ".data.info");
         s3Service.putObject(basePath, info.toJSONString());
