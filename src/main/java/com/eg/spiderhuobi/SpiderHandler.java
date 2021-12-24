@@ -45,13 +45,23 @@ public class SpiderHandler {
             JSONObject request = requests.getJSONObject(finalI);
             String requestName = request.getString("requestName");
             JSONObject source = request.getJSONObject("source");
-            String url = source.getString("url");
-            String response = HttpUtil.get(url);
-            save(config, requestName, response);
+            String requestUrl = source.getString("url");
+            String response = HttpUtil.get(requestUrl);
+            save(config, requestName, response, requestUrl);
         }
     }
 
-    private void save(JSONObject config, String requestName, String response) {
+    private JSONObject getProviderParams() {
+        JSONObject providerParams = new JSONObject();
+        Context context = InvokeUtil.getContext();
+        String requestId = context.getRequestId();
+        FunctionParam functionParam = context.getFunctionParam();
+        providerParams.put("requestId", requestId);
+        providerParams.put("functionParam", functionParam);
+        return providerParams;
+    }
+
+    private void save(JSONObject config, String requestName, String response, String requestUrl) {
         JSONObject target = config.getJSONObject("target");
         String missionName = config.getString("missionName");
         String path = target.getString("path");
@@ -74,14 +84,9 @@ public class SpiderHandler {
         info.put("dataId", dataId);
         info.put("missionName", missionName);
         info.put("requestName", requestName);
+        info.put("requestUrl", requestUrl);
 
-        JSONObject providerParams = new JSONObject();
-        Context context = InvokeUtil.getContext();
-        String requestId = context.getRequestId();
-        FunctionParam functionParam = context.getFunctionParam();
-        providerParams.put("requestId", requestId);
-        providerParams.put("functionParam", functionParam);
-        info.put("providerParams", providerParams);
+        info.put("providerParams", getProviderParams());
 
         basePath = basePath.replace("${fileName}", fileBaseName + ".data.info");
         s3Service.putObject(basePath, info.toJSONString());

@@ -2,7 +2,6 @@ package com.eg.spiderhuobi;
 
 import cn.hutool.core.util.IdUtil;
 import com.aliyun.fc.runtime.Context;
-import lombok.Data;
 
 import java.io.InputStream;
 import java.io.OutputStream;
