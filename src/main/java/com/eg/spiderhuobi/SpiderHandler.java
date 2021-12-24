@@ -78,6 +78,7 @@ public class SpiderHandler {
 
         //保存描述信息文件
         JSONObject info = new JSONObject();
+        info.put("version", "1");
         info.put("provider", "aliyun-fc");
         info.put("createTime", Instant.now().toString());
         info.put("invokeId", InvokeUtil.getInvokeId());
