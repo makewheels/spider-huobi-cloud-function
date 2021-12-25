@@ -1,6 +1,5 @@
 package com.eg.spiderhuobi;
 
-import cn.hutool.core.util.IdUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.fc.runtime.Context;
 import com.aliyun.fc.runtime.FunctionParam;
