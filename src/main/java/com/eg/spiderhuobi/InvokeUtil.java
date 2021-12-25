@@ -9,14 +9,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class InvokeUtil {
-    private static final String invokeId = IdUtil.getSnowflake().nextIdStr();
     private static InputStream input;
     private static OutputStream output;
     private static Context context;
-
-    public static String getInvokeId() {
-        return invokeId;
-    }
 
     public static InputStream getInput() {
         return input;

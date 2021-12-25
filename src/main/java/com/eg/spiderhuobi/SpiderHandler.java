@@ -52,7 +52,7 @@ public class SpiderHandler {
 
         //保存数据文件
         String dataId = IdUtil.getSnowflake().nextIdStr();
-        String invokeId = InvokeUtil.getInvokeId();
+        String invokeId = IdUtil.getSnowflake().nextIdStr();
         String dataFileName = invokeId + "-" + dataId + ".data";
         String basePath = path;
         path = path.replace("${fileName}", dataFileName);
