@@ -1,5 +1,5 @@
 {
-  "version": "2",
+  "crawlVersion": "1",
   "missionName": "huobi",
   "target": {
     "type": "object-storage",

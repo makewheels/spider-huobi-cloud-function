@@ -5,18 +5,11 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.aliyun.fc.runtime.Context;
-import com.aliyun.fc.runtime.FunctionParam;
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.github.makewheels.s3util.S3Config;
 import com.github.makewheels.s3util.S3Service;
-import lombok.val;
 
 import java.io.File;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 
 public class SpiderHandler {
     private final S3Service s3Service = new S3Service();
@@ -41,8 +34,7 @@ public class SpiderHandler {
         JSONObject config = getConfig();
         JSONArray requests = config.getJSONArray("requests");
         for (int i = 0; i < requests.size(); i++) {
-            int finalI = i;
-            JSONObject request = requests.getJSONObject(finalI);
+            JSONObject request = requests.getJSONObject(i);
             String requestName = request.getString("requestName");
             JSONObject source = request.getJSONObject("source");
             String requestUrl = source.getString("url");
@@ -60,29 +52,36 @@ public class SpiderHandler {
 
         //保存数据文件
         String dataId = IdUtil.getSnowflake().nextIdStr();
-        String fileBaseName = InvokeUtil.getInvokeId() + "-" + dataId;
+        String invokeId = InvokeUtil.getInvokeId();
+        String dataFileName = invokeId + "-" + dataId + ".data";
         String basePath = path;
-        path = path.replace("${fileName}", fileBaseName + ".data");
+        path = path.replace("${fileName}", dataFileName);
+        String dataFileObjectKey = path;
         s3Service.putObject(path, response);
         System.out.println("SAVE " + path);
 
         //保存描述信息文件
         JSONObject info = new JSONObject();
-        info.put("version", "1");
+        info.put("crawlVersion", config.getString("crawlVersion"));
         info.put("provider", "aliyun-fc");
         info.put("createTime", Instant.now().toString());
-        info.put("invokeId", InvokeUtil.getInvokeId());
-        info.put("dataId", dataId);
         info.put("missionName", missionName);
         info.put("requestName", requestName);
         info.put("requestUrl", requestUrl);
 
+        info.put("invokeId", invokeId);
+        info.put("dataId", dataId);
+        info.put("dataFileName", dataFileName);
+
+        basePath = basePath.replace("${fileName}", dataFileName + ".info");
+        String infoFileObjectKey = basePath;
+        info.put("dataFileObjectKey", dataFileObjectKey);
+        info.put("infoFileObjectKey", infoFileObjectKey);
+
         info.put("providerParams", InvokeUtil.getProviderParams());
 
-        basePath = basePath.replace("${fileName}", fileBaseName + ".data.info");
-        s3Service.putObject(basePath, info.toJSONString());
-
-        System.out.println("SAVE " + basePath);
+        System.out.println("上传对象存储：" + infoFileObjectKey);
+        s3Service.putObject(infoFileObjectKey, info.toJSONString());
 
     }
 
